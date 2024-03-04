@@ -277,16 +277,6 @@
 
           
             
-              <span class="post-comments-count">
-                <span class="post-meta-divider">|</span>
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-comment-o"></i>
-                </span>
-                <a href="/2024/03/03/SSTI%E6%A8%A1%E6%9D%BF%E6%B3%A8%E5%85%A5%E6%BC%8F%E6%B4%9E%E6%80%BB%E7%BB%93/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count gitment-comments-count" data-xid="/2024/03/03/SSTI%E6%A8%A1%E6%9D%BF%E6%B3%A8%E5%85%A5%E6%BC%8F%E6%B4%9E%E6%80%BB%E7%BB%93/" itemprop="commentsCount"></span>
-                </a>
-              </span>
-            
           
 
           
@@ -464,16 +454,23 @@
           
 
   
-    <div class="comments" id="comments">
-      
-        <div id="gitment-container"></div>
-      
-    </div>
-
-  
 
 
 
+<link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+<div id="gitalk-container"></div>
+<script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+<script type="text/javascript">
+    var gitalk = new Gitalk({
+        clientID: '<%= theme.gitalk.clientID %>',
+        clientSecret: '<%= theme.gitalk.clientSecret %>',
+        id: window.location.pathname,
+        repo: '<%= theme.gitalk.repo %>',
+        owner: '<%= theme.gitalk.owner %>',
+        admin: '<%= theme.gitalk.admin %>'
+    })
+    gitalk.render('gitalk-container')
+</script>
         </div>
         
           
@@ -732,43 +729,6 @@
 
 
 
-
-
-<!-- LOCAL: You can save these files to your site and update links -->
-    
-        
-        <link rel="stylesheet" href="https://aimingoo.github.io/gitmint/style/default.css">
-        <script src="https://aimingoo.github.io/gitmint/dist/gitmint.browser.js"></script>
-    
-<!-- END LOCAL -->
-
-    
-
-    
-      <script type="text/javascript">
-      function renderGitment(){
-        var gitment = new Gitmint({
-            id: window.location.pathname, 
-            owner: 'sxq2003',
-            repo: 'blog_comments# MUST HAVE, The repo you use to store Gitment comments',
-            
-            lang: "" || navigator.language || navigator.systemLanguage || navigator.userLanguage,
-            
-            oauth: {
-            
-            
-                client_secret: '4f6592a8858842e41718eab61380efcc166d7b01',
-            
-                client_id: 'fe76595ff0b5a9670bee'
-            }});
-        gitment.render('gitment-container');
-      }
-
-      
-      renderGitment();
-      
-      </script>
-    
 
 
 
