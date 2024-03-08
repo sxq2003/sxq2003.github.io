@@ -79,19 +79,17 @@
 
 
 
-<meta name="description" content="介绍了一些常见且有用的函数用法">
+<meta name="description" content="本文持续更新，记录遇到的问题与解决方式">
 <meta property="og:type" content="article">
-<meta property="og:title" content="SageMath常见函数用法">
-<meta property="og:url" content="http://example.com/2024/03/08/SageMath%E5%B8%B8%E8%A7%81%E7%94%A8%E6%B3%95/index.html">
+<meta property="og:title" content="我在使用hexo时遇见的问题及解决方式记录">
+<meta property="og:url" content="http://example.com/2024/03/08/%E6%88%91%E5%9C%A8%E4%BD%BF%E7%94%A8hexo%E6%97%B6%E9%81%87%E8%A7%81%E7%9A%84%E9%97%AE%E9%A2%98%E5%8F%8A%E8%A7%A3%E5%86%B3%E6%96%B9%E5%BC%8F%E8%AE%B0%E5%BD%95/index.html">
 <meta property="og:site_name" content="sxq">
-<meta property="og:description" content="介绍了一些常见且有用的函数用法">
+<meta property="og:description" content="本文持续更新，记录遇到的问题与解决方式">
 <meta property="og:locale" content="zh_CN">
-<meta property="og:image" content="http://example.com/2024/03/08/SageMath%E5%B8%B8%E8%A7%81%E7%94%A8%E6%B3%95/1.png">
-<meta property="article:published_time" content="2024-03-08T03:42:14.000Z">
-<meta property="article:modified_time" content="2024-03-08T05:17:34.901Z">
+<meta property="article:published_time" content="2024-03-08T05:21:36.000Z">
+<meta property="article:modified_time" content="2024-03-08T06:03:01.943Z">
 <meta property="article:author" content="sxq">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="http://example.com/2024/03/08/SageMath%E5%B8%B8%E8%A7%81%E7%94%A8%E6%B3%95/1.png">
 
 
 
@@ -121,13 +119,13 @@
 
 
 
-  <link rel="canonical" href="http://example.com/2024/03/08/SageMath常见用法/"/>
+  <link rel="canonical" href="http://example.com/2024/03/08/我在使用hexo时遇见的问题及解决方式记录/"/>
 
 
 
 
 
-  <title>SageMath常见函数用法 | sxq</title>
+  <title>我在使用hexo时遇见的问题及解决方式记录 | sxq</title>
   
 
 
@@ -234,7 +232,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://example.com/2024/03/08/SageMath%E5%B8%B8%E8%A7%81%E7%94%A8%E6%B3%95/">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2024/03/08/%E6%88%91%E5%9C%A8%E4%BD%BF%E7%94%A8hexo%E6%97%B6%E9%81%87%E8%A7%81%E7%9A%84%E9%97%AE%E9%A2%98%E5%8F%8A%E8%A7%A3%E5%86%B3%E6%96%B9%E5%BC%8F%E8%AE%B0%E5%BD%95/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="">
@@ -251,7 +249,7 @@
 
         
         
-          <h1 class="post-title" itemprop="name headline">SageMath常见函数用法</h1>
+          <h1 class="post-title" itemprop="name headline">我在使用hexo时遇见的问题及解决方式记录</h1>
         
 
         <div class="post-meta">
@@ -263,7 +261,7 @@
               
                 <span class="post-meta-item-text">Posted on</span>
               
-              <time title="Post created" itemprop="dateCreated datePublished" datetime="2024-03-08T11:42:14+08:00">
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2024-03-08T13:21:36+08:00">
                 2024-03-08
               </time>
             
@@ -288,7 +286,7 @@
 
           
               <div class="post-description">
-                  介绍了一些常见且有用的函数用法
+                  本文持续更新，记录遇到的问题与解决方式
               </div>
           
 
@@ -305,27 +303,26 @@
       
 
       
-        <h1 id="solve-mod"><a href="#solve-mod" class="headerlink" title="solve_mod"></a>solve_mod</h1><p>作用：解同余方程</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">x = var(&#x27;x&#x27;)</span><br><span class="line">solve_mod([方程],模数)</span><br></pre></td></tr></table></figure>
-<p>例如</p>
-<p> <img src="/2024/03/08/SageMath%E5%B8%B8%E8%A7%81%E7%94%A8%E6%B3%95/1.png" alt="1"></p>
-<p>已知$e,d_l,n$，且$e&lt;&lt;d$($d_l$指$d$的低265位)</p>
-<p>则$k≈e$，可以遍历，只剩未知数$p$</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">low_d = xxx</span><br><span class="line">n = x</span><br><span class="line"><span class="keyword">for</span> k <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">1</span>, <span class="number">150</span>):</span><br><span class="line">        p = var(<span class="string">&#x27;p&#x27;</span>)</span><br><span class="line">        p0 = solve_mod([<span class="number">149</span>*p*low_d  == p + k*(n*p - p^<span class="number">2</span> - n + p)], <span class="number">2</span>^<span class="number">265</span>)</span><br><span class="line">        maybe_p += [<span class="built_in">int</span>(x[<span class="number">0</span>]) <span class="keyword">for</span> x <span class="keyword">in</span> p0]</span><br><span class="line"><span class="comment">#会输出一堆结果，还需要验证哪个是对的</span></span><br></pre></td></tr></table></figure>
-<h1 id="discrete-log"><a href="#discrete-log" class="headerlink" title="discrete_log"></a>discrete_log</h1><p>作用：求解离散对数问题</p>
-<p>例如</p>
-<p>$c =g^m(mod\,p)$，其中$c,g,p$已知，$m$未知</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">m = discrete_log(c,mod(g,p))</span><br><span class="line"><span class="comment">#数据：</span></span><br><span class="line"><span class="comment">#g = 8999 </span></span><br><span class="line"><span class="comment">#c = 11721478752747238947534577901795278971298347908127389421908790123 </span></span><br><span class="line"><span class="comment">#p = 12297383901740584470151577318651150337988716807049317851420298478128932232846789427512414204247770572072680737351875225891650166807323215624748551744377958007176198392481481171792078565005580006750936049744616851983231170824931892761202881982041842121034608612146861881334101500003915726821683000760611763097</span></span><br></pre></td></tr></table></figure>
-<h1 id="nth-root"><a href="#nth-root" class="headerlink" title="nth_root"></a>nth_root</h1><p>作用：模数下开根</p>
-<p>例如</p>
-<p>$c = m^e(mod\,n)$</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">m=Mod(c,n).nth_root(e, <span class="built_in">all</span>=<span class="literal">True</span>)</span><br></pre></td></tr></table></figure>
-<h1 id="P-60-x-62-ZZ"><a href="#P-60-x-62-ZZ" class="headerlink" title="P.&#60;x&#62; = ZZ[]"></a>P.&#60;x&#62; = ZZ[]</h1><p>作用：整数域下设未知数x</p>
-<p>例如</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> Crypto.Util.number <span class="keyword">import</span> *</span><br><span class="line"></span><br><span class="line">n = <span class="number">44538727182858207226040251762322467288176239968967952269350336889655421753182750730773886813281253762528207970314694060562016861614492626112150259048393048617529867598499261392152098087985858905944606287003243</span></span><br><span class="line">enc = <span class="number">37578889436345667053409195986387874079577521081198523844555524501835825138236698001996990844798291201187483119265306641889824719989940722147655181198458261772053545832559971159703922610578530282146835945192532</span></span><br><span class="line"></span><br><span class="line">P.&lt;k&gt; = ZZ[] </span><br><span class="line">p = k** <span class="number">6</span> + <span class="number">7</span> *k** <span class="number">4</span> - <span class="number">40</span> *k** <span class="number">3</span> + <span class="number">12</span> *k** <span class="number">2</span> - <span class="number">114</span> *k + <span class="number">31377</span></span><br><span class="line">q = k** <span class="number">5</span> - <span class="number">8</span> *k** <span class="number">4</span> + <span class="number">19</span> *k** <span class="number">3</span> - <span class="number">313</span> *k** <span class="number">2</span> - <span class="number">14</span> *k + <span class="number">14011</span></span><br><span class="line">f = p * q - n </span><br><span class="line">k = f.roots()[<span class="number">0</span>][<span class="number">0</span>] </span><br><span class="line">p = ZZ(p (k)) </span><br><span class="line">q = ZZ(q(k)) </span><br><span class="line">d = inverse_mod( <span class="number">31337</span>, (p- <span class="number">1</span>)*(q- <span class="number">1</span>)) </span><br><span class="line">m = power_mod(enc, d, n) </span><br><span class="line"><span class="built_in">print</span> (long_to_bytes(m)</span><br></pre></td></tr></table></figure>
-<h1 id="其他"><a href="#其他" class="headerlink" title="其他"></a>其他</h1><h2 id="fac-x"><a href="#fac-x" class="headerlink" title="fac(x)"></a>fac(x)</h2><p>$x!$</p>
-<h2 id="Mod-c-n"><a href="#Mod-c-n" class="headerlink" title="Mod(c,n)"></a>Mod(c,n)</h2><p>$c$在模$n$下的值</p>
-<h2 id="euler-phi-x"><a href="#euler-phi-x" class="headerlink" title="euler_phi(x)"></a>euler_phi(x)</h2><p>$x$的欧拉函数</p>
+        <h1 id="常用命令"><a href="#常用命令" class="headerlink" title="常用命令"></a>常用命令</h1><p>我最常用的命令就3个</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"># 新建文章</span><br><span class="line">hexo n &quot;文章标题&quot;</span><br><span class="line"></span><br><span class="line"># 本地生成文章，方便调试修改</span><br><span class="line">hexo s -g</span><br><span class="line"></span><br><span class="line"># 部署文章到网站上</span><br><span class="line">hexo d -g</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<h1 id="文章标题特殊字符报错"><a href="#文章标题特殊字符报错" class="headerlink" title="文章标题特殊字符报错"></a>文章标题特殊字符报错</h1><p>例如</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">hexo n &quot;[2024xxxx]xxx&quot;</span><br></pre></td></tr></table></figure>
+<p>报错：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">YAMLException: bad indentation of a mapping entry (1:18)</span><br></pre></td></tr></table></figure>
+<p>原因是标题包含了’[‘</p>
+<p>解决方式：双引号换成单引号</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">hexo n &#x27;[2024xxxx]xxx&#x27;</span><br></pre></td></tr></table></figure>
+<p>虽然本地文件会以2024xxxx-xxx命名</p>
+<p>但是页面标题会正确显示[2024xxxx]xxx</p>
+<h1 id="Nunjucks-Error-xxxx-unexpected-token"><a href="#Nunjucks-Error-xxxx-unexpected-token" class="headerlink" title="Nunjucks Error: xxxx unexpected token: }}"></a>Nunjucks Error: xxxx unexpected token: }}</h1><p>写SSTI之类的文章时会遇到这样的报错，是因为hexo也有渲染引擎</p>
+<p>解决方式：在不想被渲染的文章的Front-matter添加一行disableNunjucks: true</p>
+<h1 id="特殊格式被自动解析"><a href="#特殊格式被自动解析" class="headerlink" title="特殊格式被自动解析"></a>特殊格式被自动解析</h1><p>比如想写&lt;x&gt;，但是会被解析成<x>(你看不到,因为这就是解析后的结果)，达不到想要的效果</x></p>
+<p>解决方式</p>
+<p>1、&lt;、&gt;和x之间用空格隔开</p>
+<p>2、使用HTML编码，比如&lt;x&gt;写成</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&amp;lt;x&amp;gt;</span><br></pre></td></tr></table></figure>
+<p>markdown会自动转义</p>
+<p>3、把内容放代码块里</p>
 
       
     </div>
@@ -350,8 +347,8 @@
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
             
-              <a href="/2024/03/07/Redis%E6%BC%8F%E6%B4%9E%E5%88%A9%E7%94%A8/" rel="next" title="Redis漏洞利用">
-                <i class="fa fa-chevron-left"></i> Redis漏洞利用
+              <a href="/2024/03/08/SageMath%E5%B8%B8%E8%A7%81%E7%94%A8%E6%B3%95/" rel="next" title="SageMath常见函数用法">
+                <i class="fa fa-chevron-left"></i> SageMath常见函数用法
               </a>
             
           </div>
@@ -359,10 +356,6 @@
           <span class="post-nav-divider"></span>
 
           <div class="post-nav-prev post-nav-item">
-            
-              <a href="/2024/03/08/%E6%88%91%E5%9C%A8%E4%BD%BF%E7%94%A8hexo%E6%97%B6%E9%81%87%E8%A7%81%E7%9A%84%E9%97%AE%E9%A2%98%E5%8F%8A%E8%A7%A3%E5%86%B3%E6%96%B9%E5%BC%8F%E8%AE%B0%E5%BD%95/" rel="prev" title="我在使用hexo时遇见的问题及解决方式记录">
-                我在使用hexo时遇见的问题及解决方式记录 <i class="fa fa-chevron-right"></i>
-              </a>
             
           </div>
         </div>
@@ -476,7 +469,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#solve-mod"><span class="nav-number">1.</span> <span class="nav-text">solve_mod</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#discrete-log"><span class="nav-number">2.</span> <span class="nav-text">discrete_log</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#nth-root"><span class="nav-number">3.</span> <span class="nav-text">nth_root</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#P-60-x-62-ZZ"><span class="nav-number">4.</span> <span class="nav-text">P.&lt;x&gt; &#x3D; ZZ[]</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%85%B6%E4%BB%96"><span class="nav-number">5.</span> <span class="nav-text">其他</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#fac-x"><span class="nav-number">5.1.</span> <span class="nav-text">fac(x)</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Mod-c-n"><span class="nav-number">5.2.</span> <span class="nav-text">Mod(c,n)</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#euler-phi-x"><span class="nav-number">5.3.</span> <span class="nav-text">euler_phi(x)</span></a></li></ol></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%B8%B8%E7%94%A8%E5%91%BD%E4%BB%A4"><span class="nav-number">1.</span> <span class="nav-text">常用命令</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%96%87%E7%AB%A0%E6%A0%87%E9%A2%98%E7%89%B9%E6%AE%8A%E5%AD%97%E7%AC%A6%E6%8A%A5%E9%94%99"><span class="nav-number">2.</span> <span class="nav-text">文章标题特殊字符报错</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Nunjucks-Error-xxxx-unexpected-token"><span class="nav-number">3.</span> <span class="nav-text">Nunjucks Error: xxxx unexpected token: }}</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E7%89%B9%E6%AE%8A%E6%A0%BC%E5%BC%8F%E8%A2%AB%E8%87%AA%E5%8A%A8%E8%A7%A3%E6%9E%90"><span class="nav-number">4.</span> <span class="nav-text">特殊格式被自动解析</span></a></li></ol></div>
             
 
           </div>
