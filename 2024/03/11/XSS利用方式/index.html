@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="zh-CN"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=2"><meta name="theme-color" content="#FFF"><link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png"><link rel="icon" type="image/ico" sizes="32x32" href="/images/favicon.ico"><meta http-equiv="Cache-Control" content="no-transform"><meta http-equiv="Cache-Control" content="no-siteapp"><link rel="alternate" type="application/rss+xml" title="sxq" href="https://sxq2003.github.io/rss.xml"><link rel="alternate" type="application/atom+xml" title="sxq" href="https://sxq2003.github.io/atom.xml"><link rel="alternate" type="application/json" title="sxq" href="https://sxq2003.github.io/feed.json"><link rel="stylesheet" href="//fonts.googleapis.com/css?family=Mulish:300,300italic,400,400italic,700,700italic%7CFredericka%20the%20Great:300,300italic,400,400italic,700,700italic%7CNoto%20Serif%20JP:300,300italic,400,400italic,700,700italic%7CNoto%20Serif%20SC:300,300italic,400,400italic,700,700italic%7CInconsolata:300,300italic,400,400italic,700,700italic&display=swap&subset=latin,latin-ext"><link rel="stylesheet" href="/css/app.css?v=0.2.5"><link rel="canonical" href="https://sxq2003.github.io/2024/03/11/XSS%E5%88%A9%E7%94%A8%E6%96%B9%E5%BC%8F/"><title>XSS利用方式 | Sxq2003 = sxq = the more you know, the more you realize you don't know.</title><meta name="generator" content="Hexo 6.3.0"></head><body itemscope itemtype="http://schema.org/WebPage"><div id="loading"><div class="cat"><div class="body"></div><div class="head"><div class="face"></div></div><div class="foot"><div class="tummy-end"></div><div class="bottom"></div><div class="legs left"></div><div class="legs right"></div></div><div class="paw"><div class="hands left"></div><div class="hands right"></div></div></div></div><div id="container"><header id="header" itemscope itemtype="http://schema.org/WPHeader"><div class="inner"><div id="brand"><div class="pjax"><h1 itemprop="name headline">XSS利用方式</h1><div class="meta"><span class="item" title="创建时间：2024-03-11 10:12:59"><span class="icon"><i class="ic i-calendar"></i> </span><span class="text">发表于</span> <time itemprop="dateCreated datePublished" datetime="2024-03-11T10:12:59+08:00">2024-03-11</time> </span><span class="item" title="本文字数"><span class="icon"><i class="ic i-pen"></i> </span><span class="text">本文字数</span> <span>1.9k</span> <span class="text">字</span> </span><span class="item" title="阅读时长"><span class="icon"><i class="ic i-clock"></i> </span><span class="text">阅读时长</span> <span>2 分钟</span></span></div></div></div><nav id="nav"><div class="inner"><div class="toggle"><div class="lines" aria-label="切换导航栏"><span class="line"></span> <span class="line"></span> <span class="line"></span></div></div><ul class="menu"><li class="item title"><a href="/" rel="start">Sxq2003</a></li></ul><ul class="right"><li class="item theme"><i class="ic i-sun"></i></li><li class="item search"><i class="ic i-search"></i></li></ul></div></nav></div><div id="imgs" class="pjax"><ul><li class="item" data-background-image="https://tva4.sinaimg.cn/large/6833939bly1giciusoyjnj219g0u0x56.jpg"></li><li class="item" data-background-image="https://tva4.sinaimg.cn/large/6833939bly1gicli3sbvtj20zk0m8x6p.jpg"></li><li class="item" data-background-image="https://tva4.sinaimg.cn/large/6833939bly1gicitf0kl1j20zk0m87fe.jpg"></li><li class="item" data-background-image="https://tva4.sinaimg.cn/large/6833939bly1gicliwyw55j20zk0m8hdt.jpg"></li><li class="item" data-background-image="https://tva4.sinaimg.cn/large/6833939bly1gipeyhsblkj20zk0m81kx.jpg"></li><li class="item" data-background-image="https://tva4.sinaimg.cn/large/6833939bly1giph47e9vtj20zk0m8x6l.jpg"></li></ul></div></header><div id="waves"><svg class="waves" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 24 150 28" preserveAspectRatio="none" shape-rendering="auto"><defs><path id="gentle-wave" d="M-160 44c30 0 58-18 88-18s 58 18 88 18 58-18 88-18 58 18 88 18 v44h-352z"/></defs><g class="parallax"><use xlink:href="#gentle-wave" x="48" y="0"/><use xlink:href="#gentle-wave" x="48" y="3"/><use xlink:href="#gentle-wave" x="48" y="5"/><use xlink:href="#gentle-wave" x="48" y="7"/></g></svg></div><main><div class="inner"><div id="main" class="pjax"><div class="article wrap"><div class="breadcrumb" itemscope itemtype="https://schema.org/BreadcrumbList"><i class="ic i-home"></i> <span><a href="/">首页</a></span></div><article itemscope itemtype="http://schema.org/Article" class="post block" lang="zh-CN"><link itemprop="mainEntityOfPage" href="https://sxq2003.github.io/2024/03/11/XSS%E5%88%A9%E7%94%A8%E6%96%B9%E5%BC%8F/"><span hidden itemprop="author" itemscope itemtype="http://schema.org/Person"><meta itemprop="image" content="/images/avatar.jpg"><meta itemprop="name" content="sxq"><meta itemprop="description" content="the more you know, the more you realize you don't know., web安全学习中..."></span><span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization"><meta itemprop="name" content="sxq"></span><div class="body md" itemprop="articleBody"><h1 id="XSS的分类"><a href="#XSS的分类" class="headerlink" title="XSS的分类"></a>XSS的分类</h1><p>反射型：经过后端，不经过数据库<br>存储型：经过后端，经过数据库</p><p>DOM型：不经过后端</p><h1 id="利用方式"><a href="#利用方式" class="headerlink" title="利用方式"></a>利用方式</h1><h2 id="通用payload"><a href="#通用payload" class="headerlink" title="通用payload"></a>通用payload</h2><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&lt;script&gt;<span class="title function_">alert</span>(<span class="number">1</span>)&lt;/script&gt;</span><br></pre></td></tr></table></figure><h2 id="构造闭合"><a href="#构造闭合" class="headerlink" title="构造闭合"></a>构造闭合</h2><p>有时遇到页面代码如下</p><figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">input</span> <span class="attr">name</span>=<span class="string">keyword</span> <span class="attr">value</span>=<span class="string">&quot;test&quot;</span>&gt;</span></span><br></pre></td></tr></table></figure><p>所以payload还要兼顾左边的闭合</p><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="string">&quot;&gt;&lt;script&gt;alert(1)&lt;/script&gt;</span></span><br></pre></td></tr></table></figure><h2 id="lt-、-gt-被转义成-lt-、-gt"><a href="#lt-、-gt-被转义成-lt-、-gt" class="headerlink" title="&lt;、&gt;被转义成\&lt;、\&gt;"></a>&lt;、&gt;被转义成\&lt;、\&gt;</h2><p>有时服务端采用htmlspecialchars()函数将一些字符转义成HTML 实体。如下</p><figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">&amp; -&gt; <span class="symbol">&amp;amp;</span></span><br><span class="line">&quot; -&gt; <span class="symbol">&amp;quot;</span></span><br><span class="line">&#x27; -&gt; &amp;#039</span><br><span class="line">&lt; -&gt; <span class="symbol">&amp;lt;</span></span><br><span class="line">&gt;  -&gt; <span class="symbol">&amp;gt;</span></span><br></pre></td></tr></table></figure><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&lt;input value=<span class="string">&#x27;test&#x27;</span>&gt;</span><br></pre></td></tr></table></figure><p>如果不能用&lt;&gt;，可以利用的payload如下(注意闭合)</p><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="string">&#x27; onmouseover = &#x27;</span><span class="attr">javascript</span>:<span class="title function_">alert</span>(<span class="number">1</span>)<span class="string">&#x27;</span></span><br></pre></td></tr></table></figure><h2 id="script被替换成scr-ipt、onmouseover被替换成o-nmouseover"><a href="#script被替换成scr-ipt、onmouseover被替换成o-nmouseover" class="headerlink" title="script被替换成scr_ipt、onmouseover被替换成o_nmouseover"></a>script被替换成scr_ipt、onmouseover被替换成o_nmouseover</h2><p>1、大小写</p><p>2、空格绕过，如果过滤的是整个<script \>，可以这样绕过：<script \>(空格只能加在尾部)</p>
+<!DOCTYPE html><html lang="zh-CN"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=2"><meta name="theme-color" content="#FFF"><link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png"><link rel="icon" type="image/ico" sizes="32x32" href="/images/favicon.ico"><meta http-equiv="Cache-Control" content="no-transform"><meta http-equiv="Cache-Control" content="no-siteapp"><link rel="alternate" type="application/rss+xml" title="sxq" href="https://sxq2003.github.io/rss.xml"><link rel="alternate" type="application/atom+xml" title="sxq" href="https://sxq2003.github.io/atom.xml"><link rel="alternate" type="application/json" title="sxq" href="https://sxq2003.github.io/feed.json"><link rel="stylesheet" href="//fonts.googleapis.com/css?family=Mulish:300,300italic,400,400italic,700,700italic%7CFredericka%20the%20Great:300,300italic,400,400italic,700,700italic%7CNoto%20Serif%20JP:300,300italic,400,400italic,700,700italic%7CNoto%20Serif%20SC:300,300italic,400,400italic,700,700italic%7CInconsolata:300,300italic,400,400italic,700,700italic&display=swap&subset=latin,latin-ext"><link rel="stylesheet" href="/css/app.css?v=0.2.5"><link rel="canonical" href="https://sxq2003.github.io/2024/03/11/XSS%E5%88%A9%E7%94%A8%E6%96%B9%E5%BC%8F/"><title>XSS利用方式 | Sxq2003 = sxq = the more you know, the more you realize you don't know.</title><meta name="generator" content="Hexo 6.3.0"></head><body itemscope itemtype="http://schema.org/WebPage"><div id="loading"><div class="cat"><div class="body"></div><div class="head"><div class="face"></div></div><div class="foot"><div class="tummy-end"></div><div class="bottom"></div><div class="legs left"></div><div class="legs right"></div></div><div class="paw"><div class="hands left"></div><div class="hands right"></div></div></div></div><div id="container"><header id="header" itemscope itemtype="http://schema.org/WPHeader"><div class="inner"><div id="brand"><div class="pjax"><h1 itemprop="name headline">XSS利用方式</h1><div class="meta"><span class="item" title="创建时间：2024-03-11 10:12:59"><span class="icon"><i class="ic i-calendar"></i> </span><span class="text">发表于</span> <time itemprop="dateCreated datePublished" datetime="2024-03-11T10:12:59+08:00">2024-03-11</time> </span><span class="item" title="本文字数"><span class="icon"><i class="ic i-pen"></i> </span><span class="text">本文字数</span> <span>1.9k</span> <span class="text">字</span> </span><span class="item" title="阅读时长"><span class="icon"><i class="ic i-clock"></i> </span><span class="text">阅读时长</span> <span>2 分钟</span></span></div></div></div><nav id="nav"><div class="inner"><div class="toggle"><div class="lines" aria-label="切换导航栏"><span class="line"></span> <span class="line"></span> <span class="line"></span></div></div><ul class="menu"><li class="item title"><a href="/" rel="start">Sxq2003</a></li></ul><ul class="right"><li class="item theme"><i class="ic i-sun"></i></li><li class="item search"><i class="ic i-search"></i></li></ul></div></nav></div><div id="imgs" class="pjax"><ul><li class="item" data-background-image="https://tva2.sinaimg.cn/large/6833939bly1gipex2cdtbj20zk0m8x6p.jpg"></li><li class="item" data-background-image="https://tva2.sinaimg.cn/large/6833939bly1gipetv6p75j20zk0m8x6p.jpg"></li><li class="item" data-background-image="https://tva2.sinaimg.cn/large/6833939bly1gicit31ffoj20zk0m8naf.jpg"></li><li class="item" data-background-image="https://tva2.sinaimg.cn/large/6833939bly1gipevarprfj20zk0m8npd.jpg"></li><li class="item" data-background-image="https://tva2.sinaimg.cn/large/6833939bly1gipew28b65j20zk0m8hdt.jpg"></li><li class="item" data-background-image="https://tva2.sinaimg.cn/large/6833939bly1gicliierfjj20zk0m8npd.jpg"></li></ul></div></header><div id="waves"><svg class="waves" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 24 150 28" preserveAspectRatio="none" shape-rendering="auto"><defs><path id="gentle-wave" d="M-160 44c30 0 58-18 88-18s 58 18 88 18 58-18 88-18 58 18 88 18 v44h-352z"/></defs><g class="parallax"><use xlink:href="#gentle-wave" x="48" y="0"/><use xlink:href="#gentle-wave" x="48" y="3"/><use xlink:href="#gentle-wave" x="48" y="5"/><use xlink:href="#gentle-wave" x="48" y="7"/></g></svg></div><main><div class="inner"><div id="main" class="pjax"><div class="article wrap"><div class="breadcrumb" itemscope itemtype="https://schema.org/BreadcrumbList"><i class="ic i-home"></i> <span><a href="/">首页</a></span></div><article itemscope itemtype="http://schema.org/Article" class="post block" lang="zh-CN"><link itemprop="mainEntityOfPage" href="https://sxq2003.github.io/2024/03/11/XSS%E5%88%A9%E7%94%A8%E6%96%B9%E5%BC%8F/"><span hidden itemprop="author" itemscope itemtype="http://schema.org/Person"><meta itemprop="image" content="/images/avatar.jpg"><meta itemprop="name" content="sxq"><meta itemprop="description" content="the more you know, the more you realize you don't know., web安全学习中..."></span><span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization"><meta itemprop="name" content="sxq"></span><div class="body md" itemprop="articleBody"><h1 id="XSS的分类"><a href="#XSS的分类" class="headerlink" title="XSS的分类"></a>XSS的分类</h1><p>反射型：经过后端，不经过数据库<br>存储型：经过后端，经过数据库</p><p>DOM型：不经过后端</p><h1 id="利用方式"><a href="#利用方式" class="headerlink" title="利用方式"></a>利用方式</h1><h2 id="通用payload"><a href="#通用payload" class="headerlink" title="通用payload"></a>通用payload</h2><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&lt;script&gt;<span class="title function_">alert</span>(<span class="number">1</span>)&lt;/script&gt;</span><br></pre></td></tr></table></figure><h2 id="构造闭合"><a href="#构造闭合" class="headerlink" title="构造闭合"></a>构造闭合</h2><p>有时遇到页面代码如下</p><figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">input</span> <span class="attr">name</span>=<span class="string">keyword</span> <span class="attr">value</span>=<span class="string">&quot;test&quot;</span>&gt;</span></span><br></pre></td></tr></table></figure><p>所以payload还要兼顾左边的闭合</p><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="string">&quot;&gt;&lt;script&gt;alert(1)&lt;/script&gt;</span></span><br></pre></td></tr></table></figure><h2 id="lt-、-gt-被转义成-lt-、-gt"><a href="#lt-、-gt-被转义成-lt-、-gt" class="headerlink" title="&lt;、&gt;被转义成\&lt;、\&gt;"></a>&lt;、&gt;被转义成\&lt;、\&gt;</h2><p>有时服务端采用htmlspecialchars()函数将一些字符转义成HTML 实体。如下</p><figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">&amp; -&gt; <span class="symbol">&amp;amp;</span></span><br><span class="line">&quot; -&gt; <span class="symbol">&amp;quot;</span></span><br><span class="line">&#x27; -&gt; &amp;#039</span><br><span class="line">&lt; -&gt; <span class="symbol">&amp;lt;</span></span><br><span class="line">&gt;  -&gt; <span class="symbol">&amp;gt;</span></span><br></pre></td></tr></table></figure><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&lt;input value=<span class="string">&#x27;test&#x27;</span>&gt;</span><br></pre></td></tr></table></figure><p>如果不能用&lt;&gt;，可以利用的payload如下(注意闭合)</p><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="string">&#x27; onmouseover = &#x27;</span><span class="attr">javascript</span>:<span class="title function_">alert</span>(<span class="number">1</span>)<span class="string">&#x27;</span></span><br></pre></td></tr></table></figure><h2 id="script被替换成scr-ipt、onmouseover被替换成o-nmouseover"><a href="#script被替换成scr-ipt、onmouseover被替换成o-nmouseover" class="headerlink" title="script被替换成scr_ipt、onmouseover被替换成o_nmouseover"></a>script被替换成scr_ipt、onmouseover被替换成o_nmouseover</h2><p>1、大小写</p><p>2、空格绕过，如果过滤的是整个<script \>，可以这样绕过：<script \>(空格只能加在尾部)</p>
 <p>3、超链接，payload如下</p>
 <figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">test<span class="string">&quot;&gt;&lt;a href=&quot;</span><span class="attr">javascript</span>:<span class="title function_">alert</span>(<span class="number">1</span>)</span><br></pre></td></tr></table></figure>
 <h2 id="双写绕过"><a href="#双写绕过" class="headerlink" title="双写绕过"></a>双写绕过</h2><p>服务端的部分源码如下</p>
@@ -56,7 +56,7 @@
     <div class="item left">
       
 
-  <a href="/2024/03/10/XXE%E6%BC%8F%E6%B4%9E%E6%80%BB%E7%BB%93%E4%B8%8E%E5%88%A9%E7%94%A8/" itemprop="url" rel="prev" data-background-image="https:&#x2F;&#x2F;tva4.sinaimg.cn&#x2F;mw690&#x2F;6833939bly1gicitspjpbj20zk0m81ky.jpg" title="XXE漏洞总结与利用">
+  <a href="/2024/03/10/XXE%E6%BC%8F%E6%B4%9E%E6%80%BB%E7%BB%93%E4%B8%8E%E5%88%A9%E7%94%A8/" itemprop="url" rel="prev" data-background-image="https:&#x2F;&#x2F;tva2.sinaimg.cn&#x2F;mw690&#x2F;6833939bly1gipexw3o58j20zk0m8e81.jpg" title="XXE漏洞总结与利用">
   <span class="type">上一篇</span>
   <span class="category"><i class="ic i-flag"></i> </span>
   <h3>XXE漏洞总结与利用</h3>
@@ -66,7 +66,7 @@
     <div class="item right">
       
 
-  <a href="/2024/03/11/MySql%E6%80%BB%E7%BB%93/" itemprop="url" rel="next" data-background-image="https:&#x2F;&#x2F;tva4.sinaimg.cn&#x2F;mw690&#x2F;6833939bly1giclh3brzpj20zk0m8ann.jpg" title="MySql总结">
+  <a href="/2024/03/11/MySql%E6%80%BB%E7%BB%93/" itemprop="url" rel="next" data-background-image="https:&#x2F;&#x2F;tva2.sinaimg.cn&#x2F;mw690&#x2F;6833939bly1giclj9410cj20zk0m8h12.jpg" title="MySql总结">
   <span class="type">下一篇</span>
   <span class="category"><i class="ic i-flag"></i> </span>
   <h3>MySql总结</h3>
@@ -190,59 +190,6 @@
 <div class="breadcrumb">
 </div>
 
-    <span><a href="/2024/03/08/SageMath%E5%B8%B8%E8%A7%81%E7%94%A8%E6%B3%95/" title="SageMath常见函数用法">SageMath常见函数用法</a></span>
-  </li>
-
-      
-  <li class="item">
-    
-<div class="breadcrumb">
-</div>
-
-    <span><a href="/2024/03/11/MySql%E6%80%BB%E7%BB%93/" title="MySql总结">MySql总结</a></span>
-  </li>
-
-      
-  <li class="item">
-    
-<div class="breadcrumb">
-<a href="/categories/web%E5%AE%89%E5%85%A8/" title="分类于 web安全">web安全</a>
-<i class="ic i-angle-right"></i>
-<a href="/categories/web%E5%AE%89%E5%85%A8/SSTI/" title="分类于 SSTI">SSTI</a>
-</div>
-
-    <span><a href="/2024/03/03/SSTI%E6%A8%A1%E6%9D%BF%E6%B3%A8%E5%85%A5%E6%BC%8F%E6%B4%9E%E6%80%BB%E7%BB%93/" title="SSTI模板注入漏洞总结">SSTI模板注入漏洞总结</a></span>
-  </li>
-
-      
-  <li class="item">
-    
-<div class="breadcrumb">
-<a href="/categories/web%E5%AE%89%E5%85%A8/" title="分类于 web安全">web安全</a>
-<i class="ic i-angle-right"></i>
-<a href="/categories/web%E5%AE%89%E5%85%A8/Java/" title="分类于 Java">Java</a>
-<i class="ic i-angle-right"></i>
-<a href="/categories/web%E5%AE%89%E5%85%A8/Java/%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96/" title="分类于 反序列化">反序列化</a>
-</div>
-
-    <span><a href="/2024/03/14/Java%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E6%BC%8F%E6%B4%9E/" title="Java反序列化漏洞">Java反序列化漏洞</a></span>
-  </li>
-
-      
-  <li class="item">
-    
-<div class="breadcrumb">
-</div>
-
-    <span><a href="/2024/03/07/Redis%E6%BC%8F%E6%B4%9E%E5%88%A9%E7%94%A8/" title="Redis漏洞利用">Redis漏洞利用</a></span>
-  </li>
-
-      
-  <li class="item">
-    
-<div class="breadcrumb">
-</div>
-
     <span><a href="/2024/03/11/XSS%E5%88%A9%E7%94%A8%E6%96%B9%E5%BC%8F/" title="XSS利用方式">XSS利用方式</a></span>
   </li>
 
@@ -250,12 +197,9 @@
   <li class="item">
     
 <div class="breadcrumb">
-<a href="/categories/web%E5%AE%89%E5%85%A8/" title="分类于 web安全">web安全</a>
-<i class="ic i-angle-right"></i>
-<a href="/categories/web%E5%AE%89%E5%85%A8/%E5%B7%A5%E5%85%B7%E7%94%A8%E6%B3%95/" title="分类于 工具用法">工具用法</a>
 </div>
 
-    <span><a href="/2024/03/08/sqlmap%E7%9A%84%E4%BD%BF%E7%94%A8/" title="sqlmap的使用">sqlmap的使用</a></span>
+    <span><a href="/2024/03/08/SageMath%E5%B8%B8%E8%A7%81%E7%94%A8%E6%B3%95/" title="SageMath常见函数用法">SageMath常见函数用法</a></span>
   </li>
 
       
@@ -280,7 +224,31 @@
 <div class="breadcrumb">
 </div>
 
-    <span><a href="/2024/03/04/SSRF%E6%9C%8D%E5%8A%A1%E5%99%A8%E7%AB%AF%E8%AF%B7%E6%B1%82%E4%BC%AA%E9%80%A0%E6%80%BB%E7%BB%93/" title="SSRF服务器端请求伪造总结">SSRF服务器端请求伪造总结</a></span>
+    <span><a href="/2024/03/07/Redis%E6%BC%8F%E6%B4%9E%E5%88%A9%E7%94%A8/" title="Redis漏洞利用">Redis漏洞利用</a></span>
+  </li>
+
+      
+  <li class="item">
+    
+<div class="breadcrumb">
+<a href="/categories/web%E5%AE%89%E5%85%A8/" title="分类于 web安全">web安全</a>
+<i class="ic i-angle-right"></i>
+<a href="/categories/web%E5%AE%89%E5%85%A8/SSTI/" title="分类于 SSTI">SSTI</a>
+</div>
+
+    <span><a href="/2024/03/03/SSTI%E6%A8%A1%E6%9D%BF%E6%B3%A8%E5%85%A5%E6%BC%8F%E6%B4%9E%E6%80%BB%E7%BB%93/" title="SSTI模板注入漏洞总结">SSTI模板注入漏洞总结</a></span>
+  </li>
+
+      
+  <li class="item">
+    
+<div class="breadcrumb">
+<a href="/categories/web%E5%AE%89%E5%85%A8/" title="分类于 web安全">web安全</a>
+<i class="ic i-angle-right"></i>
+<a href="/categories/web%E5%AE%89%E5%85%A8/%E5%B7%A5%E5%85%B7%E7%94%A8%E6%B3%95/" title="分类于 工具用法">工具用法</a>
+</div>
+
+    <span><a href="/2024/03/08/sqlmap%E7%9A%84%E4%BD%BF%E7%94%A8/" title="sqlmap的使用">sqlmap的使用</a></span>
   </li>
 
       
@@ -289,7 +257,44 @@
 <div class="breadcrumb">
 </div>
 
-    <span><a href="/2024/03/08/%E6%88%91%E5%9C%A8%E4%BD%BF%E7%94%A8hexo%E6%97%B6%E9%81%87%E8%A7%81%E7%9A%84%E9%97%AE%E9%A2%98%E5%8F%8A%E8%A7%A3%E5%86%B3%E6%96%B9%E5%BC%8F%E8%AE%B0%E5%BD%95/" title="我在使用hexo时遇见的问题及解决方式记录">我在使用hexo时遇见的问题及解决方式记录</a></span>
+    <span><a href="/2024/03/11/MySql%E6%80%BB%E7%BB%93/" title="MySql总结">MySql总结</a></span>
+  </li>
+
+      
+  <li class="item">
+    
+<div class="breadcrumb">
+</div>
+
+    <span><a href="/2024/03/07/%E4%B8%80%E4%BA%9B%E8%BF%87%E6%BB%A4%E7%9A%84%E7%BB%95%E8%BF%87%E6%96%B9%E6%B3%95/" title="某些过滤的绕过方式汇总">某些过滤的绕过方式汇总</a></span>
+  </li>
+
+      
+  <li class="item">
+    
+<div class="breadcrumb">
+<a href="/categories/web%E5%AE%89%E5%85%A8/" title="分类于 web安全">web安全</a>
+<i class="ic i-angle-right"></i>
+<a href="/categories/web%E5%AE%89%E5%85%A8/Java/" title="分类于 Java">Java</a>
+<i class="ic i-angle-right"></i>
+<a href="/categories/web%E5%AE%89%E5%85%A8/Java/%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96/" title="分类于 反序列化">反序列化</a>
+</div>
+
+    <span><a href="/2024/03/14/Java%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E6%BC%8F%E6%B4%9E/" title="Java反序列化漏洞">Java反序列化漏洞</a></span>
+  </li>
+
+      
+  <li class="item">
+    
+<div class="breadcrumb">
+<a href="/categories/web%E5%AE%89%E5%85%A8/" title="分类于 web安全">web安全</a>
+<i class="ic i-angle-right"></i>
+<a href="/categories/web%E5%AE%89%E5%85%A8/php/" title="分类于 php">php</a>
+<i class="ic i-angle-right"></i>
+<a href="/categories/web%E5%AE%89%E5%85%A8/php/%E4%BC%AA%E5%8D%8F%E8%AE%AE/" title="分类于 伪协议">伪协议</a>
+</div>
+
+    <span><a href="/2024/03/24/php%E4%BC%AA%E5%8D%8F%E8%AE%AE%E5%88%A9%E7%94%A8/" title="php伪协议利用">php伪协议利用</a></span>
   </li>
 
   </ul>
