@@ -6,9 +6,9 @@
     <updated>2024-03-08T03:42:14.000Z</updated>
     <category term="-sage -crypto" />
     <category term="crypto" />
+    <category term="伪随机" />
     <category term="lwe" />
     <category term="格" />
-    <category term="伪随机" />
     <entry>
         <id>https://sxq2003.github.io/2024/03/08/Sage%E5%B8%B8%E8%A7%81%E7%94%A8%E6%B3%95/</id>
         <title>Sage常见函数用法</title>

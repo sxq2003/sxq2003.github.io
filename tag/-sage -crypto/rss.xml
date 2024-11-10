@@ -9,9 +9,9 @@
         <lastBuildDate>Fri, 08 Mar 2024 11:42:14 +0800</lastBuildDate>
         <category>-sage -crypto</category>
         <category>crypto</category>
+        <category>伪随机</category>
         <category>lwe</category>
         <category>格</category>
-        <category>伪随机</category>
         <item>
             <guid isPermalink="true">https://sxq2003.github.io/2024/03/08/Sage%E5%B8%B8%E8%A7%81%E7%94%A8%E6%B3%95/</guid>
             <title>Sage常见函数用法</title>
