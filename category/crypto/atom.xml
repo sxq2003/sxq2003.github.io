@@ -4,10 +4,10 @@
     <title>sxq • Posts by &#34;crypto&#34; category</title>
     <link href="https://sxq2003.github.io" />
     <updated>2024-11-11T08:33:12.000Z</updated>
-    <category term="-sage -crypto" />
     <category term="crypto" />
     <category term="lwe" />
     <category term="格" />
+    <category term="-sage -crypto" />
     <category term="伪随机" />
     <entry>
         <id>https://sxq2003.github.io/2024/11/11/Crypto%E5%A5%BD%E9%A2%98%E8%B5%8F%E6%9E%90/</id>
@@ -66,11 +66,11 @@
 &lt;p&gt;要从一个同余方程解出两个未知数，首先肯定是想到格&lt;/p&gt;
 &lt;h3 id=&#34;法1lll求解svp&#34;&gt;法1：LLL求解SVP&lt;/h3&gt;
 &lt;p&gt;为了构造出二维格，是需要两个式子的，于是对上式展开化简，我们有&lt;/p&gt;
-&lt;p&gt;$ (p-58)P=44-q(mod ,Q) $&lt;/p&gt;
+&lt;p&gt;$ (p-58)P-q(mod ,Q) $&lt;/p&gt;
 &lt;p&gt;$ (p-58)P+kQ=44-q $&lt;/p&gt;
-&lt;p&gt;所以得到这个式子&lt;/p&gt;
-&lt;p&gt;$ * = $&lt;/p&gt;
-&lt;p&gt;中间这个二维矩阵就是我们构建的格了，它是已知的，记为L&lt;/p&gt;
+&lt;p&gt;所以得到这个式子 &lt;span class=&#34;math display&#34;&gt;\[
+\left[\begin{matrix}p-58&amp;amp;k\end{matrix}\right]*\left[\begin{matrix}1&amp;amp;P\\0&amp;amp;Q\end{matrix}\right]=\left[\begin{matrix}p-58&amp;amp;44-q\end{matrix}\right]
+\]&lt;/span&gt; 中间这个二维矩阵就是我们构建的格了，它是已知的，记为L&lt;/p&gt;
 &lt;p&gt;则det(L)=Q-P≈2048bit，记前面这个矩阵为A，后面这个为B&lt;/p&gt;
 &lt;p&gt;||A||≈||B||≈2048bit&lt;/p&gt;
 &lt;p&gt;所以对L做LLL约减求出的最短向量就很有可能等于B，然后让对应列相等，就能求出p,q&lt;/p&gt;
@@ -80,7 +80,7 @@
 &lt;p&gt;我们已经有了&lt;span class=&#34;math inline&#34;&gt;\(t+KQ=P(P-58)+Q\)&lt;/span&gt;&lt;/p&gt;
 &lt;p&gt;而且已知P,Q&amp;gt;&amp;gt;p,q,t&lt;/p&gt;
 &lt;p&gt;那么两边同时除以Q，有&lt;/p&gt;
-&lt;p&gt;$ K ≈  $&lt;/p&gt;
+&lt;p&gt;&lt;span class=&#34;math display&#34;&gt;\[K ≈ \frac{P(p-58)}{Q}\]&lt;/span&gt;&lt;/p&gt;
 &lt;p&gt;为了能使用Wiener Attack，需要两边都是分数，所以把p-58除过去，有 &lt;span class=&#34;math display&#34;&gt;\[
 \frac{K}{p-58}≈\frac{P}{Q}
 \]&lt;/span&gt; 右边是已知的，可以连分数展开，展开后的一项就包含了p-58，然后就得到p了&lt;/p&gt;
